@@ -578,129 +578,152 @@
             }
         }
 
+
         function renderLaporan(data) {
-            const to = data.toTerakhir;
-            const stats = data.statistikTO;
-            
-            // Info siswa
-            document.getElementById('studentName').textContent = data.siswa.nama;
-            document.getElementById('studentNIS').textContent = data.siswa.nis;
-            document.getElementById('studentKelas').textContent = data.siswa.kelas;
-            document.getElementById('toInfo').textContent = `Telah mengikuti ${data.totalTO}x Tryout UTBK-SNBT`;
-            
-            // PDF Header
-            document.getElementById('pdfNama').textContent = data.siswa.nama;
-            document.getElementById('pdfKelas').textContent = data.siswa.kelas;
-            document.getElementById('periodeTO').textContent = `Periode Tryout ke-${to.toKe} - ${to.tanggalFormatted}`;
-            
-            // Tabel Subtes dengan perbandingan sekolah
-            const subtesList = [
-                { key: 'penalaranUmum', label: 'Penalaran Umum (PU)', value: to.penalaranUmum },
-                { key: 'pk', label: 'Pengetahuan Kuantitatif (PK)', value: to.pk },
-                { key: 'ppu', label: 'Pengetahuan dan Pemahaman Umum (PPU)', value: to.ppu },
-                { key: 'pbm', label: 'Pemahaman Bacaan dan Menulis (PBM)', value: to.pbm },
-                { key: 'lbi', label: 'Literasi Dalam Bahasa Indonesia (LBI)', value: to.lbi },
-                { key: 'lbing', label: 'Literasi Dalam Bahasa Inggris (LBE)', value: to.lbing },
-                { key: 'pm', label: 'Penalaran Matematika (PM)', value: to.pm }
-            ];
-            
-            const tabelHTML = subtesList.map(s => {
-                const rataRata = stats ? stats[s.key].rataRata : 0;
-                const max = stats ? stats[s.key].max : 0;
-                const ket = s.value >= rataRata ? 'Diatas rata-rata sekolah' : 'Dibawah rata-rata sekolah';
-                const ketClass = s.value >= rataRata ? 'text-emerald-600' : 'text-rose-600';
-                
-                return `
-                    <tr class="border-b">
-                        <td class="px-3 py-2 font-medium">${s.label}</td>
-                        <td class="px-3 py-2 text-center font-bold text-emerald-600">${s.value.toFixed(1)}</td>
-                        <td class="px-3 py-2 text-center text-slate-600">${rataRata.toFixed(1)}</td>
-                        <td class="px-3 py-2 text-center text-slate-600">${max.toFixed(1)}</td>
-                        <td class="px-3 py-2 text-center ${ketClass} text-xs font-semibold">${ket}</td>
-                    </tr>
-                `;
-            }).join('');
-            document.getElementById('tabelSubtes').innerHTML = tabelHTML;
-            
-            // Skor Total
-            document.getElementById('pdfNilaiTOBK').textContent = to.nilaiTOBK.toFixed(1);
-            document.getElementById('pdfToKe').textContent = to.toKe;
-            document.getElementById('pdfTarget').textContent = to.target.toFixed(0);
-            
-            const perubahanEl = document.getElementById('pdfPerubahan');
-            if (to.perubahan > 0) {
-                perubahanEl.innerHTML = `<span class="text-emerald-600 font-bold">▲ +${to.perubahan.toFixed(1)}</span> <span class="text-xs text-slate-600">dari TO sebelumnya</span>`;
-            } else if (to.perubahan < 0) {
-                perubahanEl.innerHTML = `<span class="text-rose-600 font-bold">▼ ${to.perubahan.toFixed(1)}</span> <span class="text-xs text-slate-600">dari TO sebelumnya</span>`;
-            } else {
-                perubahanEl.innerHTML = `<span class="text-slate-600 font-bold">= 0</span> <span class="text-xs text-slate-600">sama dengan TO sebelumnya</span>`;
-            }
-            
-            const statusTargetEl = document.getElementById('pdfStatusTarget');
-            if (to.nilaiTOBK >= to.target) {
-                statusTargetEl.innerHTML = `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">✅ ${to.statusTarget}</span>`;
-            } else {
-                const selisih = (to.target - to.nilaiTOBK).toFixed(1);
-                statusTargetEl.innerHTML = `<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-semibold">❌ ${to.statusTarget} (kurang ${selisih})</span>`;
-            }
-            
-            // Pilihan Jurusan
-            document.getElementById('pdfJurusan1').textContent = to.jurusanPil1 || '-';
-            document.getElementById('pdfPTN1').textContent = to.ptnPil1 || '-';
-            const ket1 = String(to.ketPil1 || '');
-            document.getElementById('pdfKet1').innerHTML = ket1.toLowerCase().includes('berhasil') && !ket1.toLowerCase().includes('belum') 
-                ? '<span class="text-emerald-600">✅ Berhasil</span>' 
-                : '<span class="text-rose-600">❌ Belum Berhasil</span>';
-            
-            document.getElementById('pdfJurusan2').textContent = to.jurusanPil2 || '-';
-            document.getElementById('pdfPTN2').textContent = to.ptnPil2 || '-';
-            const ket2 = String(to.ketPil2 || '');
-            document.getElementById('pdfKet2').innerHTML = ket2.toLowerCase().includes('berhasil') && !ket2.toLowerCase().includes('belum') 
-                ? '<span class="text-emerald-600">✅ Berhasil</span>' 
-                : '<span class="text-rose-600">❌ Belum Berhasil</span>';
-            
-            // Ranking Subtes
-            const sorted = [...subtesList].sort((a, b) => b.value - a.value);
-            document.getElementById('rankKekuatan').innerHTML = sorted.slice(0, 3).map((s, i) => `
-                <div class="flex items-center justify-between text-xs">
-                    <span class="font-medium">${i+1}. ${s.label.split('(')[0].trim()}</span>
-                    <span class="font-bold text-emerald-600">${s.value.toFixed(1)}</span>
-                </div>
-            `).join('');
-            document.getElementById('rankKelemahan').innerHTML = sorted.slice(-3).reverse().map((s, i) => `
-                <div class="flex items-center justify-between text-xs">
-                    <span class="font-medium">${i+1}. ${s.label.split('(')[0].trim()}</span>
-                    <span class="font-bold text-rose-600">${s.value.toFixed(1)}</span>
-                </div>
-            `).join('');
-            
-            // Statistik
-            document.getElementById('statTertinggi').textContent = data.skorTertinggi.toFixed(1);
-            document.getElementById('statRataRata').textContent = data.skorRataRata.toFixed(1);
-            document.getElementById('statTop3').textContent = data.skorRataRata3Terbaik.toFixed(1);
-            
-            // Ringkasan
-            const subtesTertinggi = sorted[0];
-            const subtesTerendah = sorted[sorted.length - 1];
-            document.getElementById('ringkasanText').textContent = 
-                `Secara keseluruhan pencapaian ${data.siswa.nama} ${to.nilaiTOBK >= to.target ? 'sudah baik' : 'cukup baik'} dalam tryout UTBK-SNBT. ` +
-                `Ananda ${to.nilaiTOBK >= to.target ? 'sudah' : 'belum'} mencapai target TO ${to.toKe} (${to.target.toFixed(0)}). ` +
-                `Performa terbaik pada ${subtesTertinggi.label.split('(')[0].trim()} (${subtesTertinggi.value.toFixed(1)}), ` +
-                `perlu peningkatan pada ${subtesTerendah.label.split('(')[0].trim()} (${subtesTerendah.value.toFixed(1)}). ` +
-                `Tingkatkan terus semangat belajar!`;
-            
-            // Grafik Perkembangan
-            renderChartPerkembangan(data.grafikData);
-            
-            // Grafik Radar
-            renderChartRadar(subtesList);
-            
-            // Tabel Semua TO
-            renderTabelSemuaTO(data.semuaTO.sort((a, b) => a.toKe - b.toKe));
-            
-            document.getElementById('laporanContent').classList.remove('hidden');
-            if (window.lucide) lucide.createIcons();
-        }
+    const to = data.toTerakhir;
+    const stats = data.statistikTO;
+    
+    // Info siswa
+    document.getElementById('studentName').textContent = data.siswa.nama;
+    document.getElementById('studentNIS').textContent = data.siswa.nis;
+    document.getElementById('studentKelas').textContent = data.siswa.kelas;
+    document.getElementById('toInfo').textContent = `Telah mengikuti ${data.totalTO}x Tryout UTBK-SNBT`;
+    
+    // PDF Header
+    document.getElementById('pdfNama').textContent = data.siswa.nama;
+    document.getElementById('pdfKelas').textContent = data.siswa.kelas;
+    document.getElementById('periodeTO').textContent = `Periode Tryout ke-${to.toKe} - ${to.tanggalFormatted}`;
+    
+    // Tabel Subtes dengan perbandingan sekolah (DENGAN NULL CHECKS)
+    const subtesList = [
+        { key: 'penalaranUmum', label: 'Penalaran Umum (PU)', value: to.penalaranUmum },
+        { key: 'pk', label: 'Pengetahuan Kuantitatif (PK)', value: to.pk },
+        { key: 'ppu', label: 'Pengetahuan dan Pemahaman Umum (PPU)', value: to.ppu },
+        { key: 'pbm', label: 'Pemahaman Bacaan dan Menulis (PBM)', value: to.pbm },
+        { key: 'lbi', label: 'Literasi Dalam Bahasa Indonesia (LBI)', value: to.lbi },
+        { key: 'lbing', label: 'Literasi Dalam Bahasa Inggris (LBE)', value: to.lbing },
+        { key: 'pm', label: 'Penalaran Matematika (PM)', value: to.pm }
+    ];
+    
+    const tabelHTML = subtesList.map(s => {
+        // SAFE ACCESS dengan null checks
+        const subtesStats = stats && stats[s.key] ? stats[s.key] : null;
+        const rataRata = subtesStats && subtesStats.rataRata ? subtesStats.rataRata : 0;
+        const max = subtesStats && subtesStats.max ? subtesStats.max : 0;
+        const ket = s.value >= rataRata ? 'Diatas rata-rata sekolah' : 'Dibawah rata-rata sekolah';
+        const ketClass = s.value >= rataRata ? 'text-emerald-600' : 'text-rose-600';
+        
+        return `
+            <tr class="border-b">
+                <td class="px-3 py-2 font-medium">${s.label}</td>
+                <td class="px-3 py-2 text-center font-bold text-emerald-600">${s.value.toFixed(1)}</td>
+                <td class="px-3 py-2 text-center text-slate-600">${rataRata > 0 ? rataRata.toFixed(1) : '-'}</td>
+                <td class="px-3 py-2 text-center text-slate-600">${max > 0 ? max.toFixed(1) : '-'}</td>
+                <td class="px-3 py-2 text-center ${ketClass} text-xs font-semibold">${ket}</td>
+            </tr>
+        `;
+    }).join('');
+    document.getElementById('tabelSubtes').innerHTML = tabelHTML;
+    
+    // Skor Total
+    document.getElementById('pdfNilaiTOBK').textContent = to.nilaiTOBK.toFixed(1);
+    document.getElementById('pdfToKe').textContent = to.toKe;
+    document.getElementById('pdfTarget').textContent = to.target.toFixed(0);
+    
+    const perubahanEl = document.getElementById('pdfPerubahan');
+    if (to.perubahan > 0) {
+        perubahanEl.innerHTML = `<span class="text-emerald-600 font-bold">▲ +${to.perubahan.toFixed(1)}</span> <span class="text-xs text-slate-600">dari TO sebelumnya</span>`;
+    } else if (to.perubahan < 0) {
+        perubahanEl.innerHTML = `<span class="text-rose-600 font-bold">▼ ${to.perubahan.toFixed(1)}</span> <span class="text-xs text-slate-600">dari TO sebelumnya</span>`;
+    } else {
+        perubahanEl.innerHTML = `<span class="text-slate-600 font-bold">= 0</span> <span class="text-xs text-slate-600">sama dengan TO sebelumnya</span>`;
+    }
+    
+    const statusTargetEl = document.getElementById('pdfStatusTarget');
+    if (to.nilaiTOBK >= to.target) {
+        statusTargetEl.innerHTML = `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">✅ ${to.statusTarget}</span>`;
+    } else {
+        const selisih = (to.target - to.nilaiTOBK).toFixed(1);
+        statusTargetEl.innerHTML = `<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-semibold">❌ ${to.statusTarget} (kurang ${selisih})</span>`;
+    }
+    
+    // Pilihan Jurusan
+    document.getElementById('pdfJurusan1').textContent = to.jurusanPil1 || '-';
+    document.getElementById('pdfPTN1').textContent = to.ptnPil1 || '-';
+    const ket1 = String(to.ketPil1 || '');
+    document.getElementById('pdfKet1').innerHTML = ket1.toLowerCase().includes('berhasil') && !ket1.toLowerCase().includes('belum') 
+        ? '<span class="text-emerald-600">✅ Berhasil</span>' 
+        : '<span class="text-rose-600"> Belum Berhasil</span>';
+    
+    document.getElementById('pdfJurusan2').textContent = to.jurusanPil2 || '-';
+    document.getElementById('pdfPTN2').textContent = to.ptnPil2 || '-';
+    const ket2 = String(to.ketPil2 || '');
+    document.getElementById('pdfKet2').innerHTML = ket2.toLowerCase().includes('berhasil') && !ket2.toLowerCase().includes('belum') 
+        ? '<span class="text-emerald-600">✅ Berhasil</span>' 
+        : '<span class="text-rose-600">❌ Belum Berhasil</span>';
+    
+    // Ranking Subtes (DENGAN NULL CHECKS)
+    const sorted = [...subtesList].sort((a, b) => b.value - a.value);
+    
+    // Kekuatan (top 3)
+    const kekuatanContainer = document.getElementById('rankKekuatan');
+    if (sorted.length > 0) {
+        kekuatanContainer.innerHTML = sorted.slice(0, 3).map((s, i) => `
+            <div class="flex items-center justify-between text-xs">
+                <span class="font-medium">${i+1}. ${s.label.split('(')[0].trim()}</span>
+                <span class="font-bold text-emerald-600">${s.value.toFixed(1)}</span>
+            </div>
+        `).join('');
+    } else {
+        kekuatanContainer.innerHTML = '<p class="text-xs text-slate-500">Data tidak tersedia</p>';
+    }
+    
+    // Kelemahan (bottom 3)
+    const kelemahanContainer = document.getElementById('rankKelemahan');
+    if (sorted.length > 0) {
+        kelemahanContainer.innerHTML = sorted.slice(-3).reverse().map((s, i) => `
+            <div class="flex items-center justify-between text-xs">
+                <span class="font-medium">${i+1}. ${s.label.split('(')[0].trim()}</span>
+                <span class="font-bold text-rose-600">${s.value.toFixed(1)}</span>
+            </div>
+        `).join('');
+    } else {
+        kelemahanContainer.innerHTML = '<p class="text-xs text-slate-500">Data tidak tersedia</p>';
+    }
+    
+    // Statistik
+    document.getElementById('statTertinggi').textContent = data.skorTertinggi ? data.skorTertinggi.toFixed(1) : '-';
+    document.getElementById('statRataRata').textContent = data.skorRataRata ? data.skorRataRata.toFixed(1) : '-';
+    document.getElementById('statTop3').textContent = data.skorRataRata3Terbaik ? data.skorRataRata3Terbaik.toFixed(1) : '-';
+    
+    // Ringkasan
+    if (sorted.length > 0) {
+        const subtesTertinggi = sorted[0];
+        const subtesTerendah = sorted[sorted.length - 1];
+        document.getElementById('ringkasanText').textContent = 
+            `Secara keseluruhan pencapaian ${data.siswa.nama} ${to.nilaiTOBK >= to.target ? 'sudah baik' : 'cukup baik'} dalam tryout UTBK-SNBT. ` +
+            `Ananda ${to.nilaiTOBK >= to.target ? 'sudah' : 'belum'} mencapai target TO ${to.toKe} (${to.target.toFixed(0)}). ` +
+            `Performa terbaik pada ${subtesTertinggi.label.split('(')[0].trim()} (${subtesTertinggi.value.toFixed(1)}), ` +
+            `perlu peningkatan pada ${subtesTerendah.label.split('(')[0].trim()} (${subtesTerendah.value.toFixed(1)}). ` +
+            `Tingkatkan terus semangat belajar!`;
+    }
+    
+    // Grafik Perkembangan
+    if (data.grafikData && data.grafikData.length > 0) {
+        renderChartPerkembangan(data.grafikData);
+    }
+    
+    // Grafik Radar
+    renderChartRadar(subtesList);
+    
+    // Tabel Semua TO
+    if (data.semuaTO && data.semuaTO.length > 0) {
+        renderTabelSemuaTO(data.semuaTO.sort((a, b) => a.toKe - b.toKe));
+    }
+    
+    document.getElementById('laporanContent').classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+}
 
         function renderChartPerkembangan(grafikData) {
             if (chartPerkembangan) chartPerkembangan.destroy();
