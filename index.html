@@ -22,7 +22,6 @@
         body { font-family: 'Poppins', sans-serif; background: #F8FAFC; }
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
         .spinner {
             border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
@@ -34,7 +33,6 @@
             margin-right: 8px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         .loading-overlay {
             position: fixed; inset: 0;
             background: rgba(255,255,255,0.9);
@@ -53,10 +51,8 @@
             width: 48px; height: 48px;
             animation: spin 1s linear infinite;
         }
-
         .subtes-card { transition: all 0.3s ease; }
         .subtes-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-
         @media print {
             body { background: white; }
             .no-print { display: none !important; }
@@ -201,8 +197,6 @@
                     <!-- Tabel Hasil Tryout -->
                     <div>
                         <h3 class="font-bold text-slate-900 mb-3">Hasil Tryout UTBK-SNBT</h3>
-                        
-                        <!-- Desktop Table -->
                         <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead class="bg-emerald-50">
@@ -217,16 +211,20 @@
                                 <tbody id="tabelSubtes"></tbody>
                             </table>
                         </div>
-                        
-                        <!-- Mobile Cards -->
                         <div id="subtesCards" class="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                     </div>
 
-                    <!-- Skor Total Card (SIMPLE - tanpa perbandingan) -->
+                    <!-- Skor Total Card (SEDERHANA) -->
                     <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border-2 border-emerald-200">
-                        <div class="text-center">
-                            <div class="text-sm text-slate-600 font-semibold mb-2">SKOR TRYOUT TOTAL</div>
-                            <div class="text-6xl font-bold text-emerald-600" id="pdfNilaiTOBK">-</div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-slate-600 font-semibold mb-1">SKOR TRYOUT TOTAL</div>
+                                <div class="text-5xl font-bold text-emerald-600" id="pdfNilaiTOBK">-</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-slate-600">Target TO <span id="pdfToKe">-</span></div>
+                                <div class="text-2xl font-bold text-amber-600" id="pdfTarget">-</div>
+                            </div>
                         </div>
                     </div>
 
@@ -258,11 +256,11 @@
                     <!-- Ranking Subtes -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-emerald-50 rounded-xl p-4">
-                            <h4 class="font-bold text-emerald-700 mb-3 text-sm">🏆 Kekuatan Utama</h4>
+                            <h4 class="font-bold text-emerald-700 mb-3 text-sm"> Kekuatan Utama</h4>
                             <div id="rankKekuatan" class="space-y-1"></div>
                         </div>
                         <div class="bg-rose-50 rounded-xl p-4">
-                            <h4 class="font-bold text-rose-700 mb-3 text-sm">️ Area yang Perlu Ditingkatkan</h4>
+                            <h4 class="font-bold text-rose-700 mb-3 text-sm">⚠️ Area yang Perlu Ditingkatkan</h4>
                             <div id="rankKelemahan" class="space-y-1"></div>
                         </div>
                     </div>
@@ -285,9 +283,9 @@
                                         <th class="px-2 py-2">TO</th>
                                         <th class="px-2 py-2">Tanggal</th>
                                         <th class="px-2 py-2">PU</th>
-                                        <th class="px-2 py-2">PK</th>
                                         <th class="px-2 py-2">PPU</th>
                                         <th class="px-2 py-2">PBM</th>
+                                        <th class="px-2 py-2">PK</th>
                                         <th class="px-2 py-2">LBI</th>
                                         <th class="px-2 py-2">LBE</th>
                                         <th class="px-2 py-2">PM</th>
@@ -319,7 +317,7 @@
 
                     <!-- Ringkasan -->
                     <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                        <h4 class="font-bold text-slate-900 mb-2">📝 Ringkasan</h4>
+                        <h4 class="font-bold text-slate-900 mb-2"> Ringkasan</h4>
                         <p class="text-sm text-slate-700" id="ringkasanText">-</p>
                     </div>
 
@@ -552,12 +550,12 @@
             document.getElementById('toInfo').textContent = `Telah mengikuti ${data.totalTO}x Tryout UTBK-SNBT`;
             document.getElementById('periodeTO').textContent = `Periode Tryout ke-${to.toKe} - ${to.tanggalFormatted}`;
             
-            // URUTAN SUBTES SESUAI SPREADSHEET: PU, PK, PPU, PBM, LBI, LBE, PM
+            // Subtes list - URUTAN SESUAI SPREADSHEET
             const subtesList = [
                 { key: 'penalaranUmum', label: 'Penalaran Umum (PU)', short: 'PU', value: to.penalaranUmum },
-                { key: 'pk', label: 'Pengetahuan Kuantitatif (PK)', short: 'PK', value: to.pk },
                 { key: 'ppu', label: 'Pengetahuan dan Pemahaman Umum (PPU)', short: 'PPU', value: to.ppu },
                 { key: 'pbm', label: 'Pemahaman Bacaan dan Menulis (PBM)', short: 'PBM', value: to.pbm },
+                { key: 'pk', label: 'Pengetahuan Kuantitatif (PK)', short: 'PK', value: to.pk },
                 { key: 'lbi', label: 'Literasi Dalam Bahasa Indonesia (LBI)', short: 'LBI', value: to.lbi },
                 { key: 'lbing', label: 'Literasi Dalam Bahasa Inggris (LBE)', short: 'LBE', value: to.lbing },
                 { key: 'pm', label: 'Penalaran Matematika (PM)', short: 'PM', value: to.pm }
@@ -571,7 +569,7 @@
                 
                 let ket = '-';
                 let ketClass = 'text-slate-500';
-                if (s.value !== null && s.value > 0 && rataRata !== null) {
+                if (s.value !== null && rataRata !== null) {
                     if (s.value >= rataRata) {
                         ket = 'Diatas rata-rata sekolah';
                         ketClass = 'text-emerald-600';
@@ -579,7 +577,7 @@
                         ket = 'Dibawah rata-rata sekolah';
                         ketClass = 'text-rose-600';
                     }
-                } else if (s.value === null || s.value === 0) {
+                } else if (s.value === null) {
                     ket = 'Tidak mengerjakan';
                     ketClass = 'text-slate-400';
                 }
@@ -587,7 +585,7 @@
                 return `
                     <tr class="border-b">
                         <td class="px-3 py-2 font-medium">${s.label}</td>
-                        <td class="px-3 py-2 text-center font-bold ${s.value !== null && s.value > 0 ? 'text-emerald-600' : 'text-slate-400'}">${formatNilai(s.value)}</td>
+                        <td class="px-3 py-2 text-center font-bold ${s.value !== null ? 'text-emerald-600' : 'text-slate-400'}">${formatNilai(s.value)}</td>
                         <td class="px-3 py-2 text-center text-slate-600">${rataRata !== null ? rataRata.toFixed(1) : '-'}</td>
                         <td class="px-3 py-2 text-center text-slate-600">${max !== null ? max.toFixed(1) : '-'}</td>
                         <td class="px-3 py-2 text-center ${ketClass} text-xs font-semibold">${ket}</td>
@@ -605,7 +603,7 @@
                 let ket = '-';
                 let ketClass = 'text-slate-500';
                 let ketBg = 'bg-slate-50';
-                if (s.value !== null && s.value > 0 && rataRata !== null) {
+                if (s.value !== null && rataRata !== null) {
                     if (s.value >= rataRata) {
                         ket = 'Diatas rata-rata';
                         ketClass = 'text-emerald-600';
@@ -615,7 +613,7 @@
                         ketClass = 'text-rose-600';
                         ketBg = 'bg-rose-50';
                     }
-                } else if (s.value === null || s.value === 0) {
+                } else if (s.value === null) {
                     ket = 'Tidak mengerjakan';
                     ketClass = 'text-slate-500';
                     ketBg = 'bg-slate-50';
@@ -624,7 +622,7 @@
                 return `
                     <div class="subtes-card bg-white rounded-xl p-4 border border-slate-200">
                         <div class="text-xs font-semibold text-slate-600 mb-2">${s.label}</div>
-                        <div class="text-2xl font-bold ${s.value !== null && s.value > 0 ? 'text-emerald-600' : 'text-slate-400'} mb-3">${formatNilai(s.value)}</div>
+                        <div class="text-2xl font-bold ${s.value !== null ? 'text-emerald-600' : 'text-slate-400'} mb-3">${formatNilai(s.value)}</div>
                         <div class="grid grid-cols-2 gap-2 text-xs mb-2">
                             <div>
                                 <div class="text-slate-500">Rata-rata</div>
@@ -641,9 +639,11 @@
             }).join('');
             document.getElementById('subtesCards').innerHTML = cardsHTML;
             
-            // Skor Total (SIMPLE - hanya skor)
+            // Skor Total Card (SEDERHANA - tanpa perbandingan)
             const nilaiTOBK = to.nilaiTOBK !== null ? to.nilaiTOBK : 0;
             document.getElementById('pdfNilaiTOBK').textContent = nilaiTOBK > 0 ? nilaiTOBK.toFixed(1) : '-';
+            document.getElementById('pdfToKe').textContent = to.toKe;
+            document.getElementById('pdfTarget').textContent = to.target.toFixed(0);
             
             // Pilihan Jurusan
             document.getElementById('pdfJurusan1').textContent = to.jurusanPil1 || '-';
@@ -660,7 +660,7 @@
                 ? '<span class="text-emerald-600">✅ Berhasil</span>' 
                 : '<span class="text-rose-600">❌ Belum Berhasil</span>';
             
-            // Ranking Subtes (filter yang ada nilainya)
+            // Ranking Subtes
             const subtesDenganNilai = subtesList.filter(s => s.value !== null && s.value > 0);
             const sorted = [...subtesDenganNilai].sort((a, b) => b.value - a.value);
             
@@ -689,9 +689,9 @@
             }
             
             // Statistik
-            document.getElementById('statTertinggi').textContent = data.skorTertinggi > 0 ? data.skorTertinggi.toFixed(1) : '-';
-            document.getElementById('statRataRata').textContent = data.skorRataRata > 0 ? data.skorRataRata.toFixed(1) : '-';
-            document.getElementById('statTop3').textContent = data.skorRataRata3Terbaik > 0 ? data.skorRataRata3Terbaik.toFixed(1) : '-';
+            document.getElementById('statTertinggi').textContent = data.skorTertinggi !== null ? data.skorTertinggi.toFixed(1) : '-';
+            document.getElementById('statRataRata').textContent = data.skorRataRata !== null ? data.skorRataRata.toFixed(1) : '-';
+            document.getElementById('statTop3').textContent = data.skorRataRata3Terbaik !== null ? data.skorRataRata3Terbaik.toFixed(1) : '-';
             
             // Ringkasan
             if (sorted.length > 0 && nilaiTOBK > 0) {
@@ -705,7 +705,7 @@
                     `Tingkatkan terus semangat belajar!`;
             } else if (nilaiTOBK === 0) {
                 document.getElementById('ringkasanText').textContent = 
-                    `${data.siswa.nama} belum mengikuti tryout atau belum ada skor yang tercatat. Silakan ikuti tryout untuk melihat hasil.`;
+                    `${data.siswa.nama} belum mengikuti tryout atau belum ada skor yang tercatat.`;
             }
             
             // Grafik Perkembangan
@@ -776,7 +776,12 @@
                         legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true } }
                     },
                     scales: {
-                        y: { beginAtZero: false, min: 300, max: 900, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        y: { 
+                            beginAtZero: false, 
+                            min: 300, 
+                            max: 900, 
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
                         x: { grid: { display: false } }
                     }
                 }
@@ -788,7 +793,7 @@
             tbody.innerHTML = semuaTO.map(to => {
                 const target = 400 + (to.toKe - 1) * (400/9);
                 const nilai = to.nilaiTOBK !== null ? to.nilaiTOBK : 0;
-                const status = nilai >= target ? '✅ Tercapai' : (nilai === 0 ? '️ Belum TO' : '❌ Belum');
+                const status = nilai >= target ? '✅ Tercapai' : (nilai === 0 ? '⚠️ Belum TO' : '❌ Belum');
                 const statusClass = nilai >= target ? 'text-emerald-600' : (nilai === 0 ? 'text-slate-500' : 'text-rose-600');
                 const tglFormatted = formatTanggalIndo(to.tanggalTO);
                 
@@ -796,13 +801,13 @@
                     <tr class="border-b hover:bg-slate-50">
                         <td class="px-2 py-2 text-center font-bold">${to.toKe}</td>
                         <td class="px-2 py-2 text-center text-xs whitespace-nowrap">${tglFormatted}</td>
-                        <td class="px-2 py-2 text-center">${to.penalaranUmum !== null && to.penalaranUmum > 0 ? to.penalaranUmum.toFixed(0) : '-'}</td>
-                        <td class="px-2 py-2 text-center">${to.pk !== null && to.pk > 0 ? to.pk.toFixed(0) : '-'}</td>
-                        <td class="px-2 py-2 text-center">${to.ppu !== null && to.ppu > 0 ? to.ppu.toFixed(0) : '-'}</td>
-                        <td class="px-2 py-2 text-center">${to.pbm !== null && to.pbm > 0 ? to.pbm.toFixed(0) : '-'}</td>
-                        <td class="px-2 py-2 text-center">${to.lbi !== null && to.lbi > 0 ? to.lbi.toFixed(0) : '-'}</td>
-                        <td class="px-2 py-2 text-center">${to.lbing !== null && to.lbing > 0 ? to.lbing.toFixed(0) : '-'}</td>
-                        <td class="px-2 py-2 text-center">${to.pm !== null && to.pm > 0 ? to.pm.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.penalaranUmum !== null ? to.penalaranUmum.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.ppu !== null ? to.ppu.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.pbm !== null ? to.pbm.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.pk !== null ? to.pk.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.lbi !== null ? to.lbi.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.lbing !== null ? to.lbing.toFixed(0) : '-'}</td>
+                        <td class="px-2 py-2 text-center">${to.pm !== null ? to.pm.toFixed(0) : '-'}</td>
                         <td class="px-2 py-2 text-center font-bold ${nilai > 0 ? 'text-emerald-600' : 'text-slate-400'}">${nilai > 0 ? nilai.toFixed(1) : '-'}</td>
                         <td class="px-2 py-2 text-center text-amber-600">${target.toFixed(0)}</td>
                         <td class="px-2 py-2 text-center ${statusClass} text-xs font-semibold">${status}</td>
