@@ -55,10 +55,6 @@
             animation: spin 1s linear infinite;
         }
 
-        .subtes-card { transition: all 0.3s ease; }
-        .subtes-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-
-        /* Print Styles */
         @media print {
             body { background: white; }
             .no-print { display: none !important; }
@@ -67,7 +63,6 @@
             .shadow-lg, .shadow-sm { box-shadow: none !important; }
         }
 
-        /* PDF Styles */
         #laporanPDF {
             background: white;
             padding: 20px;
@@ -365,7 +360,7 @@
 
                     <!-- Ringkasan -->
                     <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                        <h4 class="font-bold text-slate-900 mb-2"> Ringkasan</h4>
+                        <h4 class="font-bold text-slate-900 mb-2">📝 Ringkasan</h4>
                         <p class="text-sm text-slate-700" id="ringkasanText">-</p>
                     </div>
 
@@ -515,6 +510,7 @@
                     hideLoading();
                 } catch (err) {
                     hideLoading();
+                    showError('Gagal memuat data siswa');
                 }
             } else {
                 await loadLaporanTO(currentUser.nis);
@@ -577,7 +573,8 @@
             } catch (err) {
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('errorState').classList.remove('hidden');
-                document.getElementById('errorMessage').textContent = 'Gagal memuat data';
+                document.getElementById('errorMessage').textContent = 'Gagal memuat data: ' + err.message;
+                console.error('Error:', err);
             }
         }
 
@@ -839,6 +836,13 @@
             document.getElementById('formSiswa').reset();
             document.getElementById('formGuru').reset();
             document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('laporanContent').classList.add('hidden');
         }
     </script>
 </body>
