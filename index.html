@@ -23,11 +23,11 @@
         .accordion-detail { 
             max-height: 0; 
             overflow: hidden; 
-            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
             opacity: 0;
         }
         .accordion-detail.open { 
-            max-height: 800px; 
+            max-height: 2500px;
             opacity: 1; 
         }
         .rotate-icon { transition: transform 0.3s ease; }
@@ -38,271 +38,140 @@
 </head>
 <body class="bg-background text-slate-800 antialiased min-h-screen">
 
-    <!-- Header -->
     <header class="bg-white shadow-sm border-b border-slate-100 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="https://suksesptn.github.io" class="text-slate-400 hover:text-primary">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </a>
                 <div class="bg-primary text-white p-2 rounded-lg">
                     <i data-lucide="target" class="w-5 h-5"></i>
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">Analisis SNBT</h1>
-                    <p class="text-xs text-slate-500">Database Kelulusan 2026</p>
+                    <p class="text-xs text-slate-500">Database Kelulusan</p>
                 </div>
             </div>
-            <button onclick="logout()" id="logoutBtn" class="hidden text-slate-400 hover:text-rose-500 transition-colors">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-            </button>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         
-        <!-- HALAMAN LOGIN -->
-        <div id="loginPage" class="max-w-md mx-auto mt-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                <div class="text-center mb-6">
-                    <div class="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="lock" class="w-8 h-8 text-primary"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold mb-2">Login Analisis SNBT</h2>
-                    <p class="text-sm text-slate-500">Pilih jenis akun untuk melanjutkan</p>
+        <!-- Filter -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Cari PTN</label>
+                    <input type="text" id="searchPTN" placeholder="Contoh: Unpad" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
                 </div>
-
-                <div class="flex gap-2 mb-6 bg-slate-100 p-1 rounded-xl">
-                    <button onclick="switchTab('siswa')" id="tabSiswa" class="flex-1 py-2 px-4 rounded-lg bg-primary text-white font-medium transition-all">Siswa/Orangtua</button>
-                    <button onclick="switchTab('guru')" id="tabGuru" class="flex-1 py-2 px-4 rounded-lg text-slate-600 font-medium transition-all">Guru</button>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Cari Jurusan</label>
+                    <input type="text" id="searchProdi" placeholder="Contoh: Kedokteran" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
                 </div>
-
-                <form id="formSiswa" class="space-y-4" onsubmit="handleLoginSiswa(event)">
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">NIS / NISN</label>
-                        <input type="text" id="loginNis" required class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-2.5 rounded-lg transition-colors">Masuk sebagai Siswa</button>
-                </form>
-
-                <form id="formGuru" class="space-y-4 hidden" onsubmit="handleLoginGuru(event)">
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">Password Guru</label>
-                        <input type="password" id="loginPassword" required class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-2.5 rounded-lg transition-colors">Masuk sebagai Guru</button>
-                </form>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jenjang</label>
+                    <select id="filterJenjang" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
+                        <option value="">Semua Jenjang</option>
+                        <option value="D3">D3</option>
+                        <option value="D4">D4</option>
+                        <option value="S1">S1</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <!-- HALAMAN DASHBOARD -->
-        <div id="dashboard" class="hidden">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Halo, <span id="userNameDisplay">Siswa</span> 👋</h2>
-                    <p class="text-sm text-slate-500">Berikut adalah data analisis kelulusan SNBT berdasarkan jurusan pilihan.</p>
+        <!-- Data Table dengan Accordion -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="table" class="w-5 h-5 text-primary"></i>
+                    <h3 class="text-lg font-bold">Data Kelulusan per Jurusan</h3>
                 </div>
+                <span id="resultCount" class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">0 jurusan</span>
             </div>
 
-            <!-- Filter -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Cari PTN</label>
-                        <input type="text" id="searchPTN" placeholder="Contoh: Universitas Indonesia" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Cari Jurusan</label>
-                        <input type="text" id="searchProdi" placeholder="Contoh: Kedokteran" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Jenjang</label>
-                        <select id="filterJenjang" class="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:border-primary outline-none text-sm">
-                            <option value="">Semua Jenjang</option>
-                            <option value="S1">S1</option>
-                            <option value="D4">D4</option>
-                            <option value="D3">D3</option>
-                        </select>
-                    </div>
-                </div>
+            <!-- Loading State -->
+            <div id="loadingState" class="p-12 text-center">
+                <div class="animate-spin w-10 h-10 border-4 border-emerald-200 border-t-primary rounded-full mx-auto mb-4"></div>
+                <p class="text-slate-500">Memuat data...</p>
             </div>
 
-            <!-- Info Box -->
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3 mb-6">
-                <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
-                <div class="text-sm text-blue-800">
-                    <p class="font-semibold mb-1">Cara Membaca Data</p>
-                    <p class="text-blue-700">Klik tombol <strong>"Detail"</strong> untuk melihat skor rata-rata, minimum, dan maksimum per subtes. Gunakan data ini sebagai gambaran target yang harus dicapai.</p>
-                </div>
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-12 text-center">
+                <i data-lucide="search-x" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+                <p class="text-slate-500">Tidak ada data yang cocok dengan pencarian</p>
             </div>
 
-            <!-- Data Table dengan Accordion -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="table" class="w-5 h-5 text-primary"></i>
-                        <h3 class="text-lg font-bold">Data Kelulusan per Jurusan</h3>
-                    </div>
-                    <span id="resultCount" class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">0 jurusan</span>
+            <!-- Table Content -->
+            <div id="tableContent" class="hidden">
+                <div class="hidden md:grid md:grid-cols-12 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                    <div class="md:col-span-1">No</div>
+                    <div class="md:col-span-3">PTN</div>
+                    <div class="md:col-span-4">Jurusan</div>
+                    <div class="md:col-span-2">Jenjang</div>
+                    <div class="md:col-span-1 text-center">Rata-rata</div>
+                    <div class="md:col-span-1 text-right">Aksi</div>
                 </div>
 
-                <div id="loadingState" class="p-12 text-center">
-                    <div class="animate-spin w-10 h-10 border-4 border-emerald-200 border-t-primary rounded-full mx-auto mb-4"></div>
-                    <p class="text-slate-500">Memuat data...</p>
-                </div>
-
-                <div id="emptyState" class="hidden p-12 text-center">
-                    <i data-lucide="search-x" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
-                    <p class="text-slate-500">Tidak ada data yang cocok dengan pencarian</p>
-                </div>
-
-                <div id="tableContent" class="hidden">
-                    <div class="hidden md:grid md:grid-cols-12 gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                        <div class="md:col-span-1">No</div>
-                        <div class="md:col-span-3">PTN</div>
-                        <div class="md:col-span-4">Jurusan</div>
-                        <div class="md:col-span-2">Jenjang</div>
-                        <div class="md:col-span-1 text-center">Rata-rata</div>
-                        <div class="md:col-span-1 text-right">Aksi</div>
-                    </div>
-                    <div id="rowsContainer" class="divide-y divide-slate-100"></div>
-                </div>
+                <div id="rowsContainer" class="divide-y divide-slate-100"></div>
             </div>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-100 mt-auto py-6">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-xs text-slate-400">© 2026 Tim Sukses PTN Al Bayan</p>
-        </div>
-    </footer>
-
     <script>
-        // =========================
-        // KONFIGURASI & STATE
-        // =========================
+        // ===== GANTI URL INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA =====
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwu6RenOGZK7cmkWMElsK8QbiGzoZIWKA69wLCSSR9HWF3DK7j2Uy1ffYvKh1HTsbwj2w/exec";
+        
         let allData = [];
-        let currentUser = null;
         let expandedRow = null;
 
-        // =========================
-        // FUNGSI HELPER PENTING
-        // =========================
-        // Fungsi ini memperbaiki masalah "-" dan NaN pada Penalaran Umum
-        function formatNilai(val) {
-            if (val === undefined || val === null || String(val).trim() === "" || String(val).trim() === "-") {
-                return "-";
-            }
-            const num = parseFloat(val);
-            return isNaN(num) ? "-" : num.toFixed(2);
-        }
+        // URUTAN SUBTES TETAP (sesuai permintaan)
+        const URUTAN_SUBTES = [
+            "PENALARAN UMUM",
+            "PENGETAHUAN DAN PEMAHAMAN UMUM",
+            "PEMAHAMAN BACAAN DAN MENULIS",
+            "PENGETAHUAN KUANTITATIF",
+            "LITERASI BAHASA INDONESIA",
+            "LITERASI BAHASA INGGRIS",
+            "PENALARAN MATEMATIKA"
+        ];
 
-        // =========================
-        // LOGIN & AUTH
-        // =========================
-        function switchTab(tab) {
-            const tabSiswa = document.getElementById('tabSiswa');
-            const tabGuru = document.getElementById('tabGuru');
-            const formSiswa = document.getElementById('formSiswa');
-            const formGuru = document.getElementById('formGuru');
-
-            if (tab === 'siswa') {
-                tabSiswa.classList.add('bg-primary', 'text-white');
-                tabSiswa.classList.remove('text-slate-600');
-                tabGuru.classList.remove('bg-primary', 'text-white');
-                tabGuru.classList.add('text-slate-600');
-                formSiswa.classList.remove('hidden');
-                formGuru.classList.add('hidden');
-            } else {
-                tabGuru.classList.add('bg-primary', 'text-white');
-                tabGuru.classList.remove('text-slate-600');
-                tabSiswa.classList.remove('bg-primary', 'text-white');
-                tabSiswa.classList.add('text-slate-600');
-                formGuru.classList.remove('hidden');
-                formSiswa.classList.add('hidden');
-            }
-        }
-
-        async function handleLoginSiswa(e) {
-            e.preventDefault();
-            const nis = document.getElementById('loginNis').value.trim();
-            if (!nis) return;
-
+        // ===== LOAD DATA DARI APPS SCRIPT =====
+        async function loadData() {
             document.getElementById('loadingState').classList.remove('hidden');
             document.getElementById('tableContent').classList.add('hidden');
-            
-            try {
-                const res = await fetch(`${APPS_SCRIPT_URL}?action=getSiswaData&nis=${encodeURIComponent(nis)}`);
-                const result = await res.json();
-                
-                if (result.success && result.data) {
-                    currentUser = { type: 'siswa', nis: nis, nama: result.data.nama };
-                    allData = result.data.jurusan || [];
-                    showDashboard();
-                } else {
-                    alert('Data siswa tidak ditemukan. Periksa kembali NIS/NISN Anda.');
-                }
-            } catch (err) {
-                alert('Gagal memuat data. Periksa koneksi internet Anda.');
-            }
-        }
-
-        async function handleLoginGuru(e) {
-            e.preventDefault();
-            const password = document.getElementById('loginPassword').value.trim();
-            if (password !== 'guru2026') { // Ganti dengan password guru yang sebenarnya
-                alert('Password salah!');
-                return;
-            }
-
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('tableContent').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
 
             try {
-                const res = await fetch(`${APPS_SCRIPT_URL}?action=getAllJurusanData`);
+                const res = await fetch(`${APPS_SCRIPT_URL}?action=getStatistikJurusan`);
                 const result = await res.json();
-                
+
+                document.getElementById('loadingState').classList.add('hidden');
+
                 if (result.success) {
-                    currentUser = { type: 'guru', nama: 'Guru' };
                     allData = result.data || [];
-                    showDashboard();
+                    renderData(allData);
                 } else {
-                    alert('Gagal memuat data jurusan.');
+                    showError(result.message || 'Gagal memuat data');
                 }
             } catch (err) {
-                alert('Gagal memuat data. Periksa koneksi internet Anda.');
+                document.getElementById('loadingState').classList.add('hidden');
+                showError('Gagal memuat data. Periksa koneksi atau URL Apps Script. Error: ' + err.message);
             }
         }
 
-        function showDashboard() {
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-            document.getElementById('userNameDisplay').textContent = currentUser.nama;
-            
-            document.getElementById('loadingState').classList.add('hidden');
-            renderData(allData);
+        function showError(msg) {
+            const emptyState = document.getElementById('emptyState');
+            emptyState.classList.remove('hidden');
+            emptyState.innerHTML = `
+                <i data-lucide="alert-circle" class="w-12 h-12 text-rose-300 mx-auto mb-3"></i>
+                <p class="text-rose-600">${msg}</p>
+            `;
+            lucide.createIcons();
         }
 
-        function logout() {
-            currentUser = null;
-            allData = [];
-            expandedRow = null;
-            document.getElementById('loginPage').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-            document.getElementById('formSiswa').reset();
-            document.getElementById('formGuru').reset();
-        }
-
-        // =========================
-        // RENDER DATA & ACCORDION
-        // =========================
+        // ===== RENDER DATA KE TABEL =====
         function renderData(data) {
             const container = document.getElementById('rowsContainer');
-            const emptyState = document.getElementById('emptyState');
             const tableContent = document.getElementById('tableContent');
+            const emptyState = document.getElementById('emptyState');
             const resultCount = document.getElementById('resultCount');
 
             container.innerHTML = '';
@@ -311,6 +180,13 @@
             if (data.length === 0) {
                 tableContent.classList.add('hidden');
                 emptyState.classList.remove('hidden');
+                emptyState.innerHTML = `
+                    <div class="p-12 text-center">
+                        <i data-lucide="search-x" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+                        <p class="text-slate-500">Tidak ada data yang cocok dengan pencarian</p>
+                    </div>
+                `;
+                lucide.createIcons();
                 return;
             }
 
@@ -318,22 +194,35 @@
             emptyState.classList.add('hidden');
 
             data.forEach((item, index) => {
-                const avgTotal = formatNilai(item.avgTotal);
+                const avg = item.avg || {};
+                const scoreKeys = Object.keys(avg).filter(k => avg[k] !== null);
+                const avgTotal = scoreKeys.length > 0 
+                    ? (scoreKeys.reduce((a, k) => a + parseFloat(avg[k]), 0) / scoreKeys.length).toFixed(2)
+                    : '-';
+
                 const row = document.createElement('div');
-                row.className = 'accordion-row bg-white hover:bg-slate-50 transition-colors';
-                row.setAttribute('data-id', index);
-                
+                row.className = 'accordion-row';
+                row.dataset.id = index;
+
                 row.innerHTML = `
-                    <div class="grid grid-cols-2 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-5 py-4 items-center cursor-pointer" onclick="toggleAccordion(${index})">
-                        <div class="md:col-span-1 text-sm font-semibold text-slate-500">${index + 1}</div>
-                        <div class="md:col-span-3 font-semibold text-slate-900 text-sm md:text-base">${item.ptn || '-'}</div>
-                        <div class="md:col-span-4 text-sm text-slate-700">${item.prodi || '-'}</div>
-                        <div class="md:col-span-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                ${item.jenjang || '-'}
-                            </span>
+                    <div class="grid grid-cols-2 md:grid-cols-12 gap-2 md:gap-4 px-4 md:px-5 py-4 hover:bg-slate-50 cursor-pointer transition-colors" onclick="toggleAccordion(${index})">
+                        <div class="md:col-span-1 flex md:block items-center">
+                            <span class="md:hidden text-xs text-slate-400 mr-2">No:</span>
+                            <span class="text-sm font-semibold text-slate-500">${index + 1}</span>
                         </div>
-                        <div class="md:col-span-1 flex md:justify-center items-center">
+                        <div class="md:col-span-3">
+                            <span class="md:hidden text-xs text-slate-400">PTN: </span>
+                            <span class="text-sm font-bold text-slate-900">${item.ptn || '-'}</span>
+                        </div>
+                        <div class="md:col-span-4">
+                            <span class="md:hidden text-xs text-slate-400">Jurusan: </span>
+                            <span class="text-sm text-slate-700 font-medium">${item.prodi || '-'}</span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="md:hidden text-xs text-slate-400">Jenjang: </span>
+                            <span class="inline-block px-2 py-1 rounded-md bg-slate-100 text-xs font-semibold text-slate-700">${item.jenjang || '-'}</span>
+                        </div>
+                        <div class="md:col-span-1 flex md:block items-center justify-start md:justify-center">
                             <span class="md:hidden text-xs text-slate-400 mr-2">Rata²:</span>
                             <span class="text-base md:text-lg font-bold text-emerald-600">${avgTotal}</span>
                         </div>
@@ -376,10 +265,10 @@
                 `;
                 container.appendChild(row);
             });
-
             lucide.createIcons();
         }
 
+        // ===== TOGGLE ACCORDION =====
         function toggleAccordion(index) {
             const detail = document.getElementById(`detail-${index}`);
             const row = document.querySelector(`.accordion-row[data-id="${index}"]`);
@@ -394,6 +283,7 @@
                 return;
             }
 
+            // Tutup accordion sebelumnya jika ada
             if (expandedRow !== null) {
                 const prevDetail = document.getElementById(`detail-${expandedRow}`);
                 const prevRow = document.querySelector(`.accordion-row[data-id="${expandedRow}"]`);
@@ -415,51 +305,40 @@
             }
         }
 
-        // =========================
-        // PERBAIKAN UTAMA DI SINI
-        // =========================
+        // ===== RENDER DETAIL SUBTES =====
         function renderSubtes(index) {
             const item = allData[index];
             const grid = document.getElementById(`subtes-grid-${index}`);
-            const scores = item.scores || {};
-            const mins = item.min || {};
-            const maxs = item.max || {};
+            
+            const avg = item.avg || {};
+            const min = item.min || {};
+            const max = item.max || {};
 
-            // 1. Urutan subtes DIKUNCI sesuai permintaan (tidak diurutkan berdasarkan nilai)
-            const urutanSubtes = [
-                "Penalaran Umum",
-                "Pengetahuan dan Pemahaman Umum",
-                "Pemahaman Bacaan dan Menulis",
-                "Pengetahuan Kuantitatif",
-                "Literasi Bahasa Indonesia",
-                "Literasi Bahasa Inggris",
-                "Penalaran Matematika"
-            ];
+            // Render sesuai URUTAN TETAP
+            grid.innerHTML = URUTAN_SUBTES.map(subtesName => {
+                const rawAvg = avg[subtesName];
+                const rawMin = min[subtesName];
+                const rawMax = max[subtesName];
+                
+                const avgDisplay = (rawAvg !== null && rawAvg !== undefined) ? rawAvg : "-";
+                const minDisplay = (rawMin !== null && rawMin !== undefined) ? rawMin : "-";
+                const maxDisplay = (rawMax !== null && rawMax !== undefined) ? rawMax : "-";
 
-            grid.innerHTML = urutanSubtes.map(subtes => {
-                // 2. Cari key di data yang cocok (case-insensitive) agar "PENALARAN UMUM" atau "Penalaran Umum" tetap terbaca
-                const matchedKey = Object.keys(scores).find(k => k.toLowerCase().trim() === subtes.toLowerCase().trim()) || subtes;
-                
-                // 3. Gunakan formatNilai agar "-" atau data kosong tidak menjadi NaN
-                const avg = formatNilai(scores[matchedKey]);
-                const min = formatNilai(mins[matchedKey]);
-                const max = formatNilai(maxs[matchedKey]);
-                
                 return `
                     <div class="subtes-card bg-white rounded-xl p-3 border border-slate-200 shadow-sm">
-                        <div class="text-xs text-slate-500 mb-2 font-medium leading-tight">${subtes}</div>
+                        <div class="text-xs text-slate-500 mb-2 font-medium leading-tight h-8 flex items-end">${subtesName}</div>
                         <div class="flex items-baseline gap-1 mb-2">
-                            <span class="text-xl font-bold text-emerald-600">${avg}</span>
+                            <span class="text-xl font-bold ${avgDisplay === '-' ? 'text-slate-400' : 'text-emerald-600'}">${avgDisplay}</span>
                             <span class="text-xs text-slate-400">rata²</span>
                         </div>
                         <div class="flex justify-between text-xs pt-2 border-t border-slate-100">
                             <div>
                                 <div class="text-[10px] text-slate-400">Min</div>
-                                <div class="font-semibold text-rose-500">${min}</div>
+                                <div class="font-semibold ${minDisplay === '-' ? 'text-slate-400' : 'text-rose-500'}">${minDisplay}</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-[10px] text-slate-400">Max</div>
-                                <div class="font-semibold text-blue-500">${max}</div>
+                                <div class="font-semibold ${maxDisplay === '-' ? 'text-slate-400' : 'text-blue-500'}">${maxDisplay}</div>
                             </div>
                         </div>
                     </div>
@@ -467,9 +346,7 @@
             }).join('');
         }
 
-        // =========================
-        // FILTER
-        // =========================
+        // ===== FILTER DATA =====
         function filterData() {
             const ptn = document.getElementById('searchPTN').value.toLowerCase();
             const prodi = document.getElementById('searchProdi').value.toLowerCase();
@@ -486,12 +363,15 @@
             renderData(filtered);
         }
 
+        // ===== EVENT LISTENERS =====
         ['searchPTN', 'searchProdi', 'filterJenjang'].forEach(id => {
             document.getElementById(id).addEventListener('input', filterData);
         });
 
-        // Init icons
-        lucide.createIcons();
+        // Muat data saat halaman dibuka
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
     </script>
 </body>
 </html>
